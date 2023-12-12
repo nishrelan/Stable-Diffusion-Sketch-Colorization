@@ -10,8 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-d', type=str, required=True)
 
 def normalize(tensor):
-    with torch.no_grad():
-        return tensor / tensor.norm(p=2, dim=1, keepdim=True)
+    return tensor / tensor.norm(p=2, dim=1, keepdim=True)
 
 def main():
     args = parser.parse_args()
@@ -28,7 +27,7 @@ def main():
 
     images = []
     for filename in os.listdir(directory):
-        if filename.endswith('.png'):
+        if filename.endswith('.png') or filename.endswith('.jpg'):
             print(filename)
             filepath = os.path.join(directory, filename)
             with open(filepath, 'rb') as f:
@@ -38,26 +37,32 @@ def main():
     # get images as tensors and then run inference on the clip image
     # model to get image embeddings
     im_input = image_processor(images=images, return_tensors='pt')
-    im_input = im_input.to(device)
-    im_features = model.get_image_features(**im_input)
+    with torch.no_grad():
+        im_input = im_input.to(device)
+        im_features = model.get_image_features(**im_input)
 
 
-    prompt2 = "a black and white image"
-    prompt3 = "an image with color"
-    prompt6 = "a photo of a pokemon"
-    prompt7 = "a colored photo of a pokemon"
+        prompt2 = "a black and white image"
+        prompt3 = "an image with color"
+        prompt6 = "a photo of a pokemon"
+        prompt7 = "a colored photo of a pokemon"
 
-    text_inputs = tokenizer([prompt2, prompt3, prompt6, prompt7], padding=True, return_tensors='pt')
-    text_inputs = text_inputs.to(device)
-    text_features = model.get_text_features(**text_inputs)
+        text_inputs = tokenizer([prompt2, prompt3, prompt6, prompt7], padding=True, return_tensors='pt')
+        text_inputs = text_inputs.to(device)
+        text_features = model.get_text_features(**text_inputs)
 
-    # compute cosine similarities between the prompt embedding and each image
-    im_features = normalize(im_features)
-    text_features = normalize(text_features)
+        # compute cosine similarities between the prompt embedding and each image
+        im_features = normalize(im_features)
+        text_features = normalize(text_features)
 
-    similarities = im_features @ text_features.T
+        similarities = im_features @ text_features.T
 
-    print(similarities)
+        mean_similarity = similarities.mean(dim=0)
+
+        print(mean_similarity)
+
+    
+
 
     
 

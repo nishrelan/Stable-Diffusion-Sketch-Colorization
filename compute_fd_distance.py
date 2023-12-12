@@ -40,6 +40,8 @@ def sqrtm(tensor, disp=True):
     sqrtm = torch.from_numpy(res.real).to(tensor)
     return sqrtm
 
+# This function was modified, but is based on
+# https://github.com/mseitzer/pytorch-fid/blob/master/src/pytorch_fid/fid_score.py#L243
 def compute_fd(gen_stats, target_stats, eps=1e-6):
     with torch.no_grad():
         mu1, sigma1 = gen_stats
@@ -76,18 +78,19 @@ def main():
     model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14").to(device)
     image_processor = AutoProcessor.from_pretrained("openai/clip-vit-large-patch14")
 
+    with torch.no_grad():
     # get the images from corresponding directories
-    generation_images = get_images_from_directory(args.generations)
-    target_images = get_images_from_directory(args.targets)
+        generation_images = get_images_from_directory(args.generations)
+        target_images = get_images_from_directory(args.targets)
 
-    generation_input = image_processor(images=generation_images, return_tensors='pt')
-    target_input = image_processor(images=target_images, return_tensors='pt')
+        generation_input = image_processor(images=generation_images, return_tensors='pt')
+        target_input = image_processor(images=target_images, return_tensors='pt')
 
-    generation_input = generation_input.to(device)
-    target_input = target_input.to(device)
+        generation_input = generation_input.to(device)
+        target_input = target_input.to(device)
 
-    gen_features = model.get_image_features(**generation_input)
-    target_features = model.get_image_features(**target_input)
+        gen_features = model.get_image_features(**generation_input)
+        target_features = model.get_image_features(**target_input)
 
     print("Computing FD score")
     gen_stats = get_mean_and_cov(gen_features)
