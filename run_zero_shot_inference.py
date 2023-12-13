@@ -48,11 +48,13 @@ def main():
 
     prompt = "A colorized version of the pokemon sketch."
     prompt = "A colorized version of the specific pokemon type in the sketch."
+    prompt = "A colorized version of the image"
+    prompt = "in color"
 
     output_images = []
     output_filenames = []
     for img, filename in zip(images, filenames):
-        output_im = pipe(prompt=prompt, image=img, strength=0.1, guidance_scale=20, num_images_per_prompt=1).images[0]
+        output_im = pipe(prompt=prompt, image=img, strength=0.2, guidance_scale=20, num_images_per_prompt=1).images[0]
         output_images.append(output_im)
         comps = filename.split('.')
         output_filenames.append(''.join([comps[0], '_gen.', comps[1]]))

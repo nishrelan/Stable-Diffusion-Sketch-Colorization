@@ -41,13 +41,10 @@ def main():
         im_input = im_input.to(device)
         im_features = model.get_image_features(**im_input)
 
+        prompt = "a colored photo of a pokemon"
+        prompt2 = "test prompt" # testing to see if this pipeline works
 
-        prompt2 = "a black and white image"
-        prompt3 = "an image with color"
-        prompt6 = "a photo of a pokemon"
-        prompt7 = "a colored photo of a pokemon"
-
-        text_inputs = tokenizer([prompt2, prompt3, prompt6, prompt7], padding=True, return_tensors='pt')
+        text_inputs = tokenizer([prompt, prompt2], padding=True, return_tensors='pt')
         text_inputs = text_inputs.to(device)
         text_features = model.get_text_features(**text_inputs)
 
@@ -59,7 +56,7 @@ def main():
 
         mean_similarity = similarities.mean(dim=0)
 
-        print(mean_similarity)
+        print(100*(1 - mean_similarity))
 
     
 
